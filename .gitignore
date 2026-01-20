@@ -3,12 +3,6 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-### git ###
-llM-assistant-service/
-orders-service/
-payments-service/
-reconciliation-service/
-webhook-service/
 
 ### STS ###
 .apt_generated
