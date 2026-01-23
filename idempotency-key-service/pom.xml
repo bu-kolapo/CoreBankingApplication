@@ -12,10 +12,10 @@
 
 
     <groupId>com.corebanking</groupId>
-    <artifactId>llM-assistant-service</artifactId>
+    <artifactId>idempotency-key-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>llM-assistant-service</name>
-    <description>llM-assistant Microservice</description>
+    <name>idempotency-key-service</name>
+    <description>idempotency-key Microservice</description>
 
     <dependencies>
         <!-- REST APIs -->
@@ -172,10 +172,10 @@
             </plugin>
 
             <!-- ✅ Apply Spring Boot Plugin -->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
+            <!--            <plugin>-->
+            <!--                <groupId>org.springframework.boot</groupId>-->
+            <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+            <!--            </plugin>-->
         </plugins>
     </build>
 
