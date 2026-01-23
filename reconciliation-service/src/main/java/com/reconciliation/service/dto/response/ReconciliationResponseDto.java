@@ -1,4 +1,4 @@
-package com.reconciliation.service.dto.request;
+package com.reconciliation.service.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

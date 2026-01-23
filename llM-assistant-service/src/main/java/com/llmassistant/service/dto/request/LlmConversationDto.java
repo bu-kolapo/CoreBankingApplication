@@ -7,18 +7,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LlmQueryRequestDto {
-    @NotBlank
-    private String query;
-
-    @NotNull
-    private Long customerId;
-
-    private String context;
+public class LlmConversationDto {
     private String conversationId;
+    private Long customerId;
+    private String query;
+    private String response;
+    private LocalDateTime createdAt;
 }
 

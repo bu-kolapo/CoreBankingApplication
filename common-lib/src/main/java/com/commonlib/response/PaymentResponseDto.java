@@ -1,4 +1,4 @@
-package com.webhook.service.dto;
+package com.commonlib.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,14 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WebhookPayloadDto {
-    private String eventId;
-    private String eventType;
+public class PaymentResponseDto {
     private String paymentId;
     private String status;
     private BigDecimal amount;
     private String currency;
     private String gatewayTransactionId;
-    private LocalDateTime eventTimestamp;
-    private Object metadata;
+    private String checkoutUrl;
+    private LocalDateTime createdAt;
 }

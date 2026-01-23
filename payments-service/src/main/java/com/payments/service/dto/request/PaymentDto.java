@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,28 +15,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PaymentRequestDto {
-    @NotNull
+public class PaymentDto {
+    private Long id;
+    private String paymentId;
     private Long orderId;
-
-    @NotNull
     private Long accountId;
-
-    @NotNull
-    @DecimalMin(value = "0.01")
+    private String paymentGateway;
+    private String gatewayTransactionId;
     private BigDecimal amount;
-
-    @NotBlank
-    @Size(min = 3, max = 3)
     private String currency;
-
-    @NotBlank
+    private String status;
     private String paymentMethod;
-
-    @Email
     private String customerEmail;
-
-    private String callbackUrl;
-    private String webhookUrl;
-    private String idempotencyKey;
+    private Integer retryCount;
+    private String failureReason;
+    private LocalDateTime paidAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

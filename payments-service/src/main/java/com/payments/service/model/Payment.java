@@ -1,7 +1,7 @@
 package com.payments.service.model;
 
 // payments-domain/src/main/java/com.bank.payments/model/Payment.java
-import com.payments.service.dto.request.PaymentRequestDto;
+import com.payments.service.dto.request.PaymentDto;
 import com.payments.service.dto.response.GatewayChargeResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +26,7 @@ public class Payment {
     private Instant createdAt;
     private Instant updatedAt;
 
-    public static Payment newPending(PaymentRequestDto req, String idemKey) {
+    public static Payment newPending(PaymentDto req, String idemKey) {
         Payment p = new Payment();
         p.id = UUID.randomUUID();
         p.orderId = req.getOrderId();

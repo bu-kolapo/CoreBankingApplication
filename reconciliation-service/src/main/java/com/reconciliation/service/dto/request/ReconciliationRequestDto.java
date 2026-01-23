@@ -1,4 +1,4 @@
-package com.reconciliation.service.dto.response;
+package com.reconciliation.service.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
