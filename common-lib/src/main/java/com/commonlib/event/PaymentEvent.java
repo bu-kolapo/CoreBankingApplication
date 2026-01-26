@@ -16,11 +16,12 @@ import java.time.LocalDateTime;
 @Builder
 public class PaymentEvent {
     private String eventId;
+    private String failureReason;
     private String paymentId;
     private String eventType; // INITIATED, SUCCESS, FAILED
     private BigDecimal amount;
     private String currency;
-    private String orderId;
+    private Long orderId;
     private LocalDateTime timestamp;
     private String status;
     private String gatewayTransactionId;

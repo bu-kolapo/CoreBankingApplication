@@ -30,6 +30,24 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-r2dbc</artifactId>
         </dependency>
+        <!-- Spring Data for JSF-->
+<!--        <dependency>-->
+<!--            <groupId>org.joinfaces</groupId>-->
+<!--            <artifactId>jsf-spring-boot-starter</artifactId>-->
+<!--            <version>6.0.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.glassfish</groupId>-->
+<!--            <artifactId>jakarta.faces</artifactId>-->
+<!--            <version>4.0.2</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.primefaces</groupId>-->
+<!--            <artifactId>primefaces</artifactId>-->
+<!--            <version>13.0.6</version>-->
+<!--        </dependency>-->
+
 
         <!-- PostgreSQL R2DBC Driver -->
         <dependency>
@@ -71,10 +89,6 @@
 
         <!--REACTIVE-->
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
@@ -129,16 +143,16 @@
 
 
         <!-- WebSocket -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-websocket</artifactId>-->
+<!--        </dependency>-->
 
-        <!-- STOMP over WebSocket (optional, for messaging protocol) -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-reactor-netty</artifactId>
-        </dependency>
+<!--        &lt;!&ndash; STOMP over WebSocket (optional, for messaging protocol) &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-reactor-netty</artifactId>-->
+<!--        </dependency>-->
 
         <!-- For JSON messaging -->
         <dependency>

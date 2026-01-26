@@ -1,6 +1,7 @@
-package com.idempotency.key.repository;
+package com.payments.service.repository;
 
-import com.llmassistant.service.model.IdempotencyKey;
+
+import com.payments.service.model.IdempotencyKey;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;

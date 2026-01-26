@@ -39,7 +39,6 @@
         <module>payments-service</module>
         <module>reconciliation-service</module>
         <module>transaction-service</module>
-        <module>ui-service</module>
         <module>webhook-service</module>
         <module>common-lib</module>
 
@@ -74,6 +73,9 @@
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-spring-boot3</artifactId>
         </dependency>
+
+
+
 
         <!-- Reactor support for reactive -->
         <dependency>

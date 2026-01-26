@@ -17,10 +17,13 @@ import java.time.LocalDateTime;
 @Builder
 public class PaymentDto {
     private Long id;
+    private String  idempotencyKey;
     private String paymentId;
     private Long orderId;
     private Long accountId;
     private String paymentGateway;
+    private String callbackUrl;
+    private String webhookUrl;
     private String gatewayTransactionId;
     private BigDecimal amount;
     private String currency;
