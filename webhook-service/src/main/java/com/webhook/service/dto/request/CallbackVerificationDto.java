@@ -1,4 +1,4 @@
-package com.webhook.service.dto;
+package com.webhook.service.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

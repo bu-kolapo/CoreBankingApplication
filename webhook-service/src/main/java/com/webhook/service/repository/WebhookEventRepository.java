@@ -3,21 +3,24 @@ package com.webhook.service.repository;
 import com.webhook.service.model.WebhookEvent;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Repository
-public interface WebhookEventRepository extends R2dbcRepository<WebhookEvent, Long> {
-    Mono<WebhookEvent> findByEventId(String eventId);
-    Flux<WebhookEvent> findByPaymentId(String paymentId);
-    Flux<WebhookEvent> findByStatus(String status);
+public interface WebhookEventRepository extends ReactiveCrudRepository<WebhookEvent, Long> {
 
-    @Query("SELECT * FROM webhook_events WHERE status = 'FAILED' " +
-            "AND processing_attempts < :maxAttempts ORDER BY received_at ASC")
-    Flux<WebhookEvent> findFailedEventsForRetry(int maxAttempts);
+        Mono<WebhookEvent> findByEventId(String eventId);
 
-    @Query("UPDATE webhook_events SET processing_attempts = processing_attempts + 1, " +
-            "status = :status, processing_error = :error WHERE id = :id RETURNING *")
-    Mono<WebhookEvent> updateProcessingStatus(Long id, String status, String error);
-}
+        Mono<WebhookEvent> findByWebhookId(String webhookId);
+
+        Flux<WebhookEvent> findByPaymentId(String paymentId);
+
+        Flux<WebhookEvent> findByStatusAndCreatedAtBefore(String status, LocalDateTime before);
+
+        @Query("SELECT * FROM webhooks WHERE status = :status AND retry_count < :maxRetries ORDER BY created_at ASC LIMIT :limit")
+        Flux<WebhookEvent> findFailedWebhooksForRetry(String status, int maxRetries, int limit);
+    }

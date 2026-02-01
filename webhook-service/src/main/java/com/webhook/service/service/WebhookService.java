@@ -1,26 +1,13 @@
 package com.webhook.service.service;
 
-import com.webhook.service.dto.WebhookEventDto;
+import com.webhook.service.dto.request.WebhookEventDto;
+import com.webhook.service.dto.response.WebhookResponseDto;
 import reactor.core.publisher.Mono;
 
 public interface WebhookService {
-    /**
-     * Handle incoming webhook from payment gateway
-     */
-    Mono<Void> handleWebhook(String source, String signature, WebhookEventDto payload);
+    Mono<WebhookResponseDto> handleWebhook(WebhookEventDto event, String rawPayload);
 
-    /**
-     * Verify webhook signature
-     */
-    Mono<Boolean> verifyWebhookSignature(String source, String signature, String payload);
+    Mono<Boolean> verifyWebhookSignature(String payload, String signature, String provider);
 
-    /**
-     * Get webhook event by ID
-     */
-    Mono<WebhookEventDto> getWebhookEvent(String eventId);
-
-    /**
-     * Retry failed webhook processing
-     */
-    Mono<Void> retryWebhookEvent(String eventId);
+    Mono<Void> retryFailedWebhooks();
 }

@@ -10,7 +10,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 @Service
 @Slf4j
@@ -49,8 +53,12 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             String responseBody = objectMapper.writeValueAsString(response);
 
+            // Generate a simple hash for the request (using the idempotency key as proxy)
+            String requestHash = generateHash(key + method + endpoint);
+
             IdempotencyKey idempotencyKey = IdempotencyKey.builder()
                     .idempotencyKey(key)
+                    .requestHash(requestHash)  // ← Added this
                     .endpoint(endpoint)
                     .httpMethod(method)
                     .responseBody(responseBody)
@@ -68,10 +76,15 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         }
     }
 
-    @Scheduled(cron = "0 0 2 * * ?") // Run daily at 2 AM
-    public void cleanupExpiredKeys() {
-        log.info("🧹 Cleaning up expired idempotency keys");
-        repository.deleteExpiredKeys(LocalDateTime.now())
-                .subscribe(count -> log.info("🗑️ Deleted {} expired keys", count));
+    // Add this helper method
+    private String generateHash(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            // Fallback to simple hash
+            return String.valueOf(input.hashCode());
+        }
     }
 }

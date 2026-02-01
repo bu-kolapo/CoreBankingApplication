@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Repository
-public interface PaymentRepository extends R2dbcRepository<Payment, Long> {
+public interface PaymentRepository extends ReactiveCrudRepository<Payment, Long> {
     Mono<Payment> findByPaymentId(String paymentId);
     Mono<Payment> findByGatewayTransactionId(String gatewayTransactionId);
     Flux<Payment> findByOrderId(Long orderId);

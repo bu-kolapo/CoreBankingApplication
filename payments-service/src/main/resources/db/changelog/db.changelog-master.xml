@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Existing changeSet for idempotency_keys -->
+    <changeSet id="1" author="payment-service">
+        <createTable tableName="idempotency_keys">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="idempotency_key" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="request_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="endpoint" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="http_method" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="response_body" type="TEXT"/>
+            <column name="response_status" type="INTEGER"/>
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_idempotency_unique" tableName="idempotency_keys" unique="true">
+            <column name="idempotency_key"/>
+            <column name="endpoint"/>
+            <column name="http_method"/>
+        </createIndex>
+
+        <createIndex indexName="idx_expires_at" tableName="idempotency_keys">
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- NEW: Create payments table -->
+    <changeSet id="2" author="payment-service">
+        <createTable tableName="payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="payment_id" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="order_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_gateway" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="callback_url" type="VARCHAR(500)"/>
+            <column name="webhook_url" type="VARCHAR(500)"/>
+            <column name="currency" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="VARCHAR(50)"/>
+            <column name="customer_email" type="VARCHAR(255)"/>
+            <column name="retry_count" type="INTEGER" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_payment_id" tableName="payments">
+            <column name="payment_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_order_id" tableName="payments">
+            <column name="order_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_account_id" tableName="payments">
+            <column name="account_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_status" tableName="payments">
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

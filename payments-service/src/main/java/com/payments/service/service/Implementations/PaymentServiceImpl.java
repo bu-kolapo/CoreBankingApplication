@@ -36,19 +36,19 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
     public Mono<PaymentResponseDto> initiatePayment(PaymentDto request) {
         log.info("🚀 Initiating payment for order: {}", request.getOrderId());
 
         return idempotencyService.checkIdempotency(
                         request.getIdempotencyKey(), "POST", "/api/payments")
                 .flatMap(cached -> {
-                    if (cached != null) {
-                        log.info("♻️ Idempotency hit - returning cached response");
-                        return Mono.just(cached);
-                    }
+                    log.info("♻️ Idempotency hit - returning cached response");
+                    return Mono.just(cached);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.info("🆕 No cached response - processing new payment");
                     return processNewPayment(request);
-                });
+                }));
     }
 
     @Override
@@ -73,34 +73,35 @@ public class PaymentServiceImpl implements PaymentService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return paymentRepository.save(payment)
-                .doOnSuccess(saved -> log.info("💾 Payment saved: {}", saved.getPaymentId()))
-                .flatMap(savedPayment -> {
-                    // Publish event
-                    publishPaymentCreatedEvent(savedPayment);
+        // Call payment gateway FIRST (before saving to database)
+        return paymentGatewayService.createPaymentSession(payment)
+                .flatMap(gatewayResponse -> {
+                    // Update payment with Stripe response
+                    payment.setGatewayTransactionId(gatewayResponse.getTransactionId());
+                    payment.setStatus("PROCESSING");
+                    payment.setUpdatedAt(LocalDateTime.now());
 
-                    // Call payment gateway
-                    return paymentGatewayService.createPaymentSession(savedPayment)
-                            .flatMap(gatewayResponse -> {
-                                savedPayment.setGatewayTransactionId(gatewayResponse.getTransactionId());
-                                savedPayment.setStatus("PROCESSING");
-                                savedPayment.setUpdatedAt(LocalDateTime.now());
-
-                                return paymentRepository.save(savedPayment);
-                            })
-                            .map(this::toPaymentResponseDto)
-                            .flatMap(response -> {
-                                if (request.getIdempotencyKey() != null) {
-                                    return idempotencyService.storeResponse(
-                                            request.getIdempotencyKey(),
-                                            "POST",
-                                            "/api/payments",
-                                            response,
-                                            200
-                                    ).thenReturn(response);
-                                }
-                                return Mono.just(response);
-                            });
+                    // Save to database only ONCE with complete data
+                    return paymentRepository.save(payment);
+                })
+                .doOnSuccess(saved -> {
+                    log.info("💾 Payment saved: {}", saved.getPaymentId());
+                    // Publish event after successful save
+                    publishPaymentCreatedEvent(saved);
+                })
+                .map(this::toPaymentResponseDto)
+                .flatMap(response -> {
+                    // Cache for idempotency
+                    if (request.getIdempotencyKey() != null) {
+                        return idempotencyService.storeResponse(
+                                request.getIdempotencyKey(),
+                                "POST",
+                                "/api/payments",
+                                response,
+                                200
+                        ).thenReturn(response);
+                    }
+                    return Mono.just(response);
                 })
                 .doOnError(error -> log.error("❌ Payment processing failed", error));
     }

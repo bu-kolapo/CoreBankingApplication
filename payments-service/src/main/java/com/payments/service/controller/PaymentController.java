@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api/v1/payments")
 public class PaymentController {
 
     private final PaymentServiceImpl paymentService;
@@ -35,15 +35,14 @@ public class PaymentController {
         }
 
         return paymentService.initiatePayment(request)
+                .doOnSuccess(paymentResponse -> log.info("✅ Payment initiated: {}",
+                        paymentResponse.getPaymentId()))
                 .map(ApiResponse::success)
-                .doOnSuccess(response -> log.info("✅ Payment initiated: {}",
-                        response.getData().getPaymentId()))
                 .onErrorResume(error -> {
                     log.error("❌ Payment initiation failed", error);
                     return Mono.just(ApiResponse.error(error.getMessage(), "PAYMENT_ERROR"));
                 });
     }
-
     @GetMapping("/{paymentId}")
     public Mono<ApiResponse<PaymentDto>> getPayment(@PathVariable String paymentId) {
         log.info("📥 Fetching payment: {}", paymentId);
