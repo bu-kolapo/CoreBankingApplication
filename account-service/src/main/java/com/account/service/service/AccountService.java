@@ -1,5 +1,8 @@
 package com.account.service.service;
 
+import com.account.service.dto.request.AccountRequest;
+import com.account.service.dto.request.CreditAccountRequest;
+import com.account.service.dto.request.DebitAccountRequest;
 import com.commonlib.dto.AccountDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -7,41 +10,41 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 
 public interface AccountService {
+ // Account creation
+ Mono<AccountDto> createAccount(AccountRequest request);
 
-   /**
-            * Get account by ID
-     */
-    Mono<AccountDto> getAccountById(Long accountId);
+ // Account retrieval
+ Mono<AccountDto> getAccount(String accountId);
 
-    /**
-     * Get account by account number
-     */
-    Mono<AccountDto> getAccountByNumber(String accountNumber);
+ Mono<AccountDto> getAccountByNumber(String accountNumber);
 
-    /**
-     * Get all accounts for a customer
-     */
-    Flux<AccountDto> getAccountsByCustomerId(Long customerId);
+ Flux<AccountDto> getCustomerAccounts(String customerId);
 
-    /**
-     * Debit amount from account
-     */
-    Mono<AccountDto> debitAccount(Long accountId, BigDecimal amount);
+ Mono<AccountDto> getPrimaryAccount(String customerId);
 
-    /**
-     * Credit amount to account
-     */
-    Mono<AccountDto> creditAccount(Long accountId, BigDecimal amount);
+ // Balance operations
+ Mono<AccountDto> debitAccount(DebitAccountRequest request);
 
-    /**
-     * Check account balance
-     */
-    Mono<BigDecimal> getAccountBalance(Long accountId);
+ Mono<AccountDto> creditAccount(CreditAccountRequest request);
 
-    /**
-     * Validate account status
-     */
-    Mono<Boolean> isAccountActive(Long accountId);
+ Mono<BigDecimal> getBalance(String accountId);
 
+ Mono<BigDecimal> getAvailableBalance(String accountId);
 
+ // Balance holds
+ Mono<Void> holdFunds(String accountId, BigDecimal amount, String reference);
+
+ Mono<Void> releaseFunds(String accountId, BigDecimal amount, String reference);
+
+ // Account management
+ Mono<Void> freezeAccount(String accountId, String reason);
+
+ Mono<Void> unfreezeAccount(String accountId);
+
+ Mono<Void> closeAccount(String accountId);
+
+ // Validation
+ Mono<Boolean> hasSufficientBalance(String accountId, BigDecimal amount);
+
+ Mono<Boolean> isWithinDailyLimit(String accountId, BigDecimal amount);
 }

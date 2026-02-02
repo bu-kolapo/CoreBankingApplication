@@ -1,4 +1,4 @@
-package com.commonlib.dto;
+package com.account.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,19 +7,21 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AccountDto {
+
     private String accountId;
     private String accountNumber;
+    private String customerId;
     private String accountType;
-    private BigDecimal balance;
     private String currency;
-    private Long customerId;
-    private String status;
+    private BigDecimal balance;
     private BigDecimal availableBalance;
     private BigDecimal blockedAmount;
+    private String status;
     private BigDecimal dailyTransactionLimit;
 }
