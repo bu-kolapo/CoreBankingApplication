@@ -1,4 +1,4 @@
-package com.transaction.service.dto;
+package com.account.service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,20 +10,17 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class TransactionDto {
+@AllArgsConstructor
+public class StatementTransactionDto {
 
     private String transactionId;
-    private String paymentId;
-    private String orderId;
-    private String accountId;
-    private String transactionType;
+    private String referenceNumber;
+    private String transactionType;         // PAYMENT, REFUND, REVERSAL, FEE
+    private String transactionCategory;     // DEBIT, CREDIT
     private BigDecimal amount;
     private String currency;
-    private String status;
+    private BigDecimal runningBalance;      // Balance after this transaction
     private String description;
-    private String gatewayTransactionId;
-    private String referenceNumber;
     private LocalDateTime transactionDate;
 }

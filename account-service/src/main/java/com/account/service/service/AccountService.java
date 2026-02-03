@@ -1,5 +1,6 @@
 package com.account.service.service;
 
+import com.account.service.dto.AccountStatementDto;
 import com.account.service.dto.request.AccountRequest;
 import com.account.service.dto.request.CreditAccountRequest;
 import com.account.service.dto.request.DebitAccountRequest;
@@ -8,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public interface AccountService {
  // Account creation
@@ -21,6 +23,7 @@ public interface AccountService {
  Flux<AccountDto> getCustomerAccounts(String customerId);
 
  Mono<AccountDto> getPrimaryAccount(String customerId);
+ Mono<AccountStatementDto> getAccountStatement(String accountId, LocalDateTime startDate, LocalDateTime endDate);
 
  // Balance operations
  Mono<AccountDto> debitAccount(DebitAccountRequest request);

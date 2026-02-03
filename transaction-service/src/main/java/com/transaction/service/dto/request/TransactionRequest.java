@@ -1,4 +1,4 @@
-package com.transaction.service.dto;
+package com.transaction.service.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,24 +6,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransactionDto {
-
-    private String transactionId;
+public class TransactionRequest {
     private String paymentId;
     private String orderId;
     private String accountId;
     private String transactionType;
     private BigDecimal amount;
     private String currency;
-    private String status;
     private String description;
     private String gatewayTransactionId;
-    private String referenceNumber;
-    private LocalDateTime transactionDate;
+    private String paymentGateway;
 }

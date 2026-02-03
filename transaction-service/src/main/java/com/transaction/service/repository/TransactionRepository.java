@@ -3,6 +3,7 @@ package com.transaction.service.repository;
 import com.transaction.service.model.Transaction;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,21 +12,36 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Repository
-public interface TransactionRepository extends R2dbcRepository<Transaction, Long> {
+public interface TransactionRepository extends ReactiveCrudRepository<Transaction, Long> {
     Mono<Transaction> findByTransactionId(String transactionId);
-    Flux<Transaction> findBySourceAccountId(Long accountId);
-    Flux<Transaction> findByDestinationAccountId(Long accountId);
-    Flux<Transaction> findByStatus(String status);
 
-    @Query("SELECT * FROM transactions WHERE source_account_id = :accountId " +
-            "OR destination_account_id = :accountId ORDER BY transaction_date DESC LIMIT :limit")
-    Flux<Transaction> findRecentTransactionsByAccountId(Long accountId, int limit);
+    Mono<Transaction> findByPaymentId(String paymentId);
 
-    @Query("SELECT * FROM transactions WHERE transaction_date BETWEEN :startDate AND :endDate " +
-            "AND status = :status")
-    Flux<Transaction> findByDateRangeAndStatus(LocalDateTime startDate, LocalDateTime endDate, String status);
+    Flux<Transaction> findByAccountId(String accountId);
 
-    @Query("SELECT SUM(amount) FROM transactions WHERE source_account_id = :accountId " +
-            "AND transaction_date >= :since AND status = 'COMPLETED'")
-    Mono<BigDecimal> calculateTotalDebitsSince(Long accountId, LocalDateTime since);
+    Flux<Transaction> findByAccountIdAndStatusOrderByTransactionDateDesc(
+            String accountId, String status);
+
+    Flux<Transaction> findByAccountIdAndTransactionDateBetween(
+            String accountId, LocalDateTime start, LocalDateTime end);
+
+    Flux<Transaction> findByOrderId(String orderId);
+
+    Flux<Transaction> findByGatewayTransactionId(String gatewayTransactionId);
+
+    Flux<Transaction> findByReconciledFalse();
+
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId " +
+            "AND transaction_date >= :startDate AND transaction_date <= :endDate " +
+            "ORDER BY transaction_date DESC")
+    Flux<Transaction> findAccountStatement(String accountId,
+                                           LocalDateTime startDate,
+                                           LocalDateTime endDate);
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE status = :status")
+    Mono<Long> countByStatus(String status);
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE account_id = :accountId " +
+            "AND transaction_category = :category AND status = 'COMPLETED'")
+    Mono<Double> sumByAccountAndCategory(String accountId, String category);
 }

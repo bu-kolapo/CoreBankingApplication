@@ -1,4 +1,7 @@
 package com.account.service.service.Implementation;
+import com.account.service.clients.TransactionServiceClient;
+import com.account.service.dto.AccountStatementDto;
+import com.account.service.dto.StatementTransactionDto;
 import com.account.service.dto.request.AccountRequest;
 import com.account.service.dto.request.CreditAccountRequest;
 import com.account.service.dto.request.DebitAccountRequest;
@@ -15,8 +18,11 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,12 +30,12 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final TransactionServiceClient transactionServiceClient;
 
-    public AccountServiceImpl(
-            AccountRepository accountRepository,
-            KafkaTemplate<String, Object> kafkaTemplate) {
+    public AccountServiceImpl(AccountRepository accountRepository, KafkaTemplate<String, Object> kafkaTemplate,TransactionServiceClient transactionServiceClient) {
         this.accountRepository = accountRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.transactionServiceClient=transactionServiceClient;
     }
 
     @Override
@@ -312,4 +318,98 @@ public class AccountServiceImpl implements AccountService {
                 .dailyTransactionLimit(account.getDailyTransactionLimit())
                 .build();
     }
+
+    @Override
+    public Mono<AccountStatementDto> getAccountStatement(
+            String accountId, LocalDateTime startDate, LocalDateTime endDate) {
+
+        log.info("📄 Generating statement for account: {}", accountId);
+
+        String formattedStart = startDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String formattedEnd = endDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        return accountRepository.findByAccountId(accountId)
+                .switchIfEmpty(Mono.error(new RuntimeException("Account not found")))
+                .flatMap(account ->
+
+                        // Calls Transaction Service via the client wrapper
+                        transactionServiceClient
+                                .getTransactionsByAccount(accountId, formattedStart, formattedEnd)
+                                .collectList()
+                                .map(transactions -> buildStatement(account, transactions, startDate, endDate))
+                );
+    }
+
+
+
+    private AccountStatementDto buildStatement(
+            Account account,
+            List<StatementTransactionDto> transactions,
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
+
+        BigDecimal totalDebits = transactions.stream()
+                .filter(t -> "DEBIT".equals(t.getTransactionCategory()))
+                .map(StatementTransactionDto::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalCredits = transactions.stream()
+                .filter(t -> "CREDIT".equals(t.getTransactionCategory()))
+                .map(StatementTransactionDto::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Opening balance = current balance + total debits - total credits
+        BigDecimal openingBalance = account.getBalance()
+                .add(totalDebits)
+                .subtract(totalCredits);
+
+        List<StatementTransactionDto> withRunningBalance =
+                calculateRunningBalance(transactions, openingBalance);
+
+        return AccountStatementDto.builder()
+                .accountId(account.getAccountId())
+                .accountNumber(account.getAccountNumber())
+                .customerId(account.getCustomerId())
+                .statementStartDate(startDate)
+                .statementEndDate(endDate)
+                .openingBalance(openingBalance)
+                .closingBalance(account.getBalance())
+                .totalDebits(totalDebits)
+                .totalCredits(totalCredits)
+                .transactions(withRunningBalance)
+                .build();
+    }
+
+
+    // Helper: calculates running balance per transaction
+    private List<StatementTransactionDto> calculateRunningBalance(
+            List<StatementTransactionDto> transactions, BigDecimal openingBalance) {
+
+        BigDecimal[] runningBalance = { openingBalance }; // array trick for lambda mutation
+
+        return transactions.stream()
+                .sorted((a, b) -> a.getTransactionDate().compareTo(b.getTransactionDate()))
+                .map(transaction -> {
+                    if ("DEBIT".equals(transaction.getTransactionCategory())) {
+                        runningBalance[0] = runningBalance[0].subtract(transaction.getAmount());
+                    } else {
+                        runningBalance[0] = runningBalance[0].add(transaction.getAmount());
+                    }
+
+                    // Return new instance with running balance filled in
+                    return StatementTransactionDto.builder()
+                            .transactionId(transaction.getTransactionId())
+                            .referenceNumber(transaction.getReferenceNumber())
+                            .transactionType(transaction.getTransactionType())
+                            .transactionCategory(transaction.getTransactionCategory())
+                            .amount(transaction.getAmount())
+                            .currency(transaction.getCurrency())
+                            .runningBalance(runningBalance[0])
+                            .description(transaction.getDescription())
+                            .transactionDate(transaction.getTransactionDate())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
 }
+

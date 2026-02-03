@@ -1,6 +1,7 @@
 package com.account.service.controller;
 
 
+import com.account.service.dto.AccountStatementDto;
 import com.account.service.dto.request.AccountRequest;
 import com.account.service.dto.request.CreditAccountRequest;
 import com.account.service.dto.request.DebitAccountRequest;
@@ -10,6 +11,7 @@ import com.account.service.service.AccountService;
 import com.commonlib.dto.AccountDto;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -317,5 +320,21 @@ public class AccountController {
                         .valid(false)
                         .message("Account not found")
                         .build()));
+    }
+    @GetMapping("/{accountId}/statement")
+    public Mono<ResponseEntity<AccountStatementDto>> getAccountStatement(
+            @PathVariable String accountId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+
+        log.info("📄 Getting statement for account: {} from {} to {}", accountId, startDate, endDate);
+
+        return accountService.getAccountStatement(accountId, startDate, endDate)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(error -> {
+                    log.error("❌ Failed to get account statement", error);
+                    return Mono.just(ResponseEntity.internalServerError().build());
+                });
     }
 }

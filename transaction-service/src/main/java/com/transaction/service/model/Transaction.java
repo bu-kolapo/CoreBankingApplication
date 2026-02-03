@@ -18,18 +18,40 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     private Long id;
-    private String transactionId; // Unique transaction identifier
-    private String transactionType; // DEBIT, CREDIT, TRANSFER
-    private Long sourceAccountId;
-    private Long destinationAccountId;
+
+    private String transactionId;           // UUID - our internal ID
+    private String paymentId;               // Link to payment
+    private String orderId;                 // Link to order
+    private String accountId;               // Customer account
+
+    private String transactionType;         // PAYMENT, REFUND, REVERSAL, FEE
+    private String transactionCategory;     // DEBIT, CREDIT
     private BigDecimal amount;
     private String currency;
-    private String status; // PENDING, COMPLETED, FAILED, REVERSED
+
+    private String status;                  // PENDING, COMPLETED, FAILED, REVERSED
     private String description;
-    private String category;
+
+    // Gateway information
+    private String gatewayTransactionId;    // Stripe/PayPal transaction ID
+    private String paymentGateway;          // STRIPE, PAYPAL
+
+    // Ledger information (Double-entry bookkeeping)
+    private String debitAccountId;          // Source account
+    private String creditAccountId;         // Destination account
+
+    // Reconciliation
+    private Boolean reconciled;
+    private LocalDateTime reconciledAt;
+    private String reconciliationBatchId;
+
+    // Metadata
+    private String referenceNumber;         // Customer-facing reference
+    private String metadata;                // JSON for additional data
+
+    // Audit fields
     private LocalDateTime transactionDate;
-    private String referenceNumber;
-    private String initiatedBy;
+    private LocalDateTime settledAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
