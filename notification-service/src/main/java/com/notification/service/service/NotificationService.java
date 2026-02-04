@@ -3,30 +3,24 @@ package com.notification.service.service;
 import com.commonlib.event.FraudAlertEvent;
 import com.commonlib.event.PaymentEvent;
 import com.commonlib.event.TransactionEvent;
-import com.notification.service.dto.NotificationRequestDto;
+import com.notification.service.dto.NotificationDto;
+import com.notification.service.dto.SendNotificationRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface NotificationService  {
 
-    /**
-     * Send notification
-     */
-    Mono<Void> sendNotification(NotificationRequestDto request);
+    // Core: create and send a notification
+    Mono<NotificationDto> sendNotification(SendNotificationRequest request);
 
-    /**
-     * Send payment notification
-     */
-    Mono<Void> sendPaymentNotification(PaymentEvent event);
+    // Query: get all notifications for a customer
+    Flux<NotificationDto> getCustomerNotifications(String customerId);
 
-    /**
-     * Send transaction notification
-     */
-    Mono<Void> sendTransactionNotification(TransactionEvent event);
+    // Query: get by category
+    Flux<NotificationDto> getCustomerNotificationsByCategory(String customerId, String category);
 
-    /**
-     * Send fraud alert notification
-     */
-    Mono<Void> sendFraudAlertNotification(FraudAlertEvent event);
+    // Retry: pick up FAILED notifications and try again
+    Mono<Void> retryFailedNotifications();
 }
 
 

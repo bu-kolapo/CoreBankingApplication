@@ -17,14 +17,33 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     private Long id;
-    private Long customerId;
-    private String notificationType; // EMAIL, SMS, PUSH
-    private String channel;
-    private String subject;
-    private String message;
-    private String status; // PENDING, SENT, FAILED
-    private String referenceId;
-    private String referenceType;
+
+    private String notificationId;          // UUID
+    private String customerId;              // Who receives this
+    private String customerEmail;
+    private String customerPhone;
+
+    private String notificationType;        // EMAIL, SMS, PUSH
+    private String notificationCategory;    // PAYMENT, TRANSACTION, ACCOUNT, KYC, SECURITY, RECONCILIATION
+    private String status;                  // PENDING, SENT, FAILED, DELIVERED
+
+    private String subject;                 // Email subject / push title
+    private String body;                    // The actual message content
+    private String templateId;              // Which template was used
+
+    // Source event tracking — what triggered this notification
+    private String sourceEventType;         // e.g., "payment-completed"
+    private String sourceEntityId;          // e.g., the paymentId or transactionId
+    private String sourceEntityType;        // PAYMENT, TRANSACTION, ACCOUNT, etc.
+
+    // Provider tracking
+    private String providerMessageId;       // ID returned by email/SMS provider
+    private String errorMessage;            // What went wrong if FAILED
+    private Integer retryCount;
+
+    private LocalDateTime scheduledAt;
     private LocalDateTime sentAt;
+    private LocalDateTime deliveredAt;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
