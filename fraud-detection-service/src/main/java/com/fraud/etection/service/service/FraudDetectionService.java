@@ -1,24 +1,40 @@
 package com.fraud.etection.service.service;
 
-import com.fraud.etection.service.dto.FraudAlertDto;
-import com.fraud.etection.service.dto.FraudDetectionRequestDto;
-import com.fraud.etection.service.dto.FraudDetectionResponseDto;
+import com.fraud.etection.service.dto.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface FraudDetectionService {
-    /**
-     * Analyze transaction for fraud
-     */
-    Mono<FraudDetectionResponseDto> analyzeTransaction(FraudDetectionRequestDto request);
+    // Core fraud check
+    Mono<FraudCheckResult> performFraudCheck(FraudCheckRequest request);
 
-    /**
-     * Get fraud alert by ID
-     */
-    Mono<FraudAlertDto> getFraudAlert(String alertId);
+    // Get fraud check details
+    Mono<FraudCheckResult> getFraudCheck(String checkId);
 
-    /**
-     * Update fraud alert status
-     */
-    Mono<Void> updateAlertStatus(String alertId, String status, String resolution);
+    // Get all fraud checks for an entity
+    Flux<FraudCheckResult> getFraudChecksForEntity(String entityType, String entityId);
 
+    // Get flagged/blocked items pending review
+    Flux<FraudCheckResult> getFlaggedChecks();
+
+    Flux<FraudCheckResult> getBlockedChecks();
+
+    // Risk profile management
+    Mono<CustomerRiskProfileDto> getCustomerRiskProfile(String customerId);
+
+    Mono<CustomerRiskProfileDto> updateCustomerRiskProfile(String customerId);
+
+    // Blacklist / Whitelist
+    Mono<Void> blacklistCustomer(String customerId, String reason);
+
+    Mono<Void> whitelistCustomer(String customerId);
+
+    Mono<Void> removeFromBlacklist(String customerId);
+
+    // Manual review
+    Mono<Void> approveCheck(String checkId, String reviewedBy, String notes);
+
+    Mono<Void> rejectCheck(String checkId, String reviewedBy, String notes);
 }
+
+
